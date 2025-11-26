@@ -10,9 +10,12 @@ import { useTranslation } from "@/contexts/TranslationContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { toast } from "sonner";
+import { useContactInfo } from "@/hooks/useContactInfo";
 
 const ContactUsPage = () => {
   const { t, language } = useTranslation();
+  const { data: apiData } = useContactInfo();
+  
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -24,25 +27,25 @@ const ContactUsPage = () => {
     {
       icon: Mail,
       title: t("contact.email"),
-      value: "contact@toorrii.com",
+      value: apiData?.email || "contact@toorrii.com",
       color: "text-primary",
     },
     {
       icon: Phone,
       title: t("contact.phone"),
-      value: "+213 (0) 123 456 789",
+      value: apiData?.telephone || "+213 (0) 123 456 789",
       color: "text-secondary",
     },
     {
       icon: MapPin,
       title: t("contact.location"),
-      value: "Algiers, Algeria",
+      value: apiData?.adresse ? `${apiData.adresse}, ${apiData.ville}, ${apiData.wilaya}` : "Algiers, Algeria",
       color: "text-primary",
     },
     {
       icon: Clock,
       title: t("contact.hours"),
-      value: t("contact.hoursValue"),
+      value: apiData?.horaires || t("contact.hoursValue"),
       color: "text-secondary",
     },
   ];
