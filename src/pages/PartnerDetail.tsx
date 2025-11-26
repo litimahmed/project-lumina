@@ -14,16 +14,35 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { getPartnerById } from "@/data/partnersData";
 import { useTranslation } from "@/contexts/TranslationContext";
+import { usePartner } from "@/hooks/usePartners";
+
 const PartnerDetail = () => {
-  const {
-    partnerId
-  } = useParams<{
-    partnerId: string;
-  }>();
-  const {
-    t
-  } = useTranslation();
-  const partner = partnerId ? getPartnerById(partnerId) : undefined;
+  const { partnerId } = useParams<{ partnerId: string }>();
+  const { t } = useTranslation();
+  
+  // Try to get partner from API first, fallback to hardcoded data
+  const { data: apiPartner, isLoading } = usePartner(partnerId || '');
+  const hardcodedPartner = partnerId ? getPartnerById(partnerId) : undefined;
+  
+  // Merge API data with hardcoded data (API takes priority for available fields)
+  const partner = apiPartner ? {
+    id: partnerId || '',
+    name: apiPartner.nom_partenaire,
+    logo: hardcodedPartner?.logo || '',
+    description: apiPartner.description,
+    industry: apiPartner.type_partenaire || hardcodedPartner?.industry || 'Other',
+    founded: hardcodedPartner?.founded || 'N/A',
+    headquarters: apiPartner.adresse ? `${apiPartner.adresse}` : hardcodedPartner?.headquarters || 'N/A',
+    about: apiPartner.description,
+    collaboration: {
+      startDate: new Date(apiPartner.date_deb).getFullYear().toString(),
+      services: hardcodedPartner?.collaboration.services || [],
+      impact: hardcodedPartner?.collaboration.impact || ''
+    },
+    stats: hardcodedPartner?.stats || [],
+    website: apiPartner.site_web,
+    gallery: hardcodedPartner?.gallery
+  } : hardcodedPartner;
   if (!partner) {
     return <div className="min-h-screen bg-background">
         <Header />

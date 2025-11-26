@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useTranslation } from "@/contexts/TranslationContext";
 import { partnersData } from "@/data/partnersData";
+import { usePartners } from "@/hooks/usePartners";
 
 /**
  * @component Partnerships
@@ -18,6 +19,21 @@ import { partnersData } from "@/data/partnersData";
 const Partnerships = () => {
   // Hook to get the translation function.
   const { t } = useTranslation();
+  
+  // Fetch partners from API, fallback to hardcoded data
+  const { data: apiPartners } = usePartners();
+  
+  // Create display partners list - merge API data with hardcoded data for logos
+  const displayPartners = apiPartners && apiPartners.length > 0 
+    ? apiPartners.filter(p => p.actif !== false).map(apiPartner => {
+        const hardcodedMatch = partnersData.find(hp => hp.id === apiPartner.id?.toString());
+        return {
+          id: apiPartner.id?.toString() || Math.random().toString(),
+          name: apiPartner.nom_partenaire,
+          logo: hardcodedMatch?.logo || partnersData[0].logo, // Fallback to first logo if no match
+        };
+      })
+    : partnersData.map(p => ({ id: p.id, name: p.name, logo: p.logo }));
   
   return (
     <section id="partnerships" className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30">
@@ -47,7 +63,7 @@ const Partnerships = () => {
           {/* The scrolling container. The `animate-scroll-infinite` class applies the infinite scroll animation. */}
           <div className="flex w-max gap-6 animate-scroll-infinite">
             {/* The partnersData array is duplicated to create a seamless loop. */}
-            {[...partnersData, ...partnersData].map((partner, index) => (
+            {[...displayPartners, ...displayPartners].map((partner, index) => (
               <Link
                 key={`${partner.id}-${index}`}
                 to={`/partner/${partner.id}`}
