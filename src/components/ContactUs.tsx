@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Mail, Phone, MapPin, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/contexts/TranslationContext";
+import { useContactInfo } from "@/hooks/useContactInfo";
 
 /**
  * @component ContactUs
@@ -19,13 +20,14 @@ import { useTranslation } from "@/contexts/TranslationContext";
 const ContactUs = () => {
   // Hook to get the translation function.
   const { t } = useTranslation();
+  const { data: apiData } = useContactInfo();
   
-  // An object containing the contact information.
+  // An object containing the contact information (API data OR hardcoded fallback).
   const contactInfo = {
-    email: "contact@toorrii.com",
-    phone: "+213 (0) 123 456 789",
-    address: "Algiers, Algeria",
-    hours: t("contact.hoursValue")
+    email: apiData?.email || "contact@toorrii.com",
+    phone: apiData?.telephone || "+213 (0) 123 456 789",
+    address: apiData?.adresse ? `${apiData.adresse}, ${apiData.ville}, ${apiData.wilaya}` : "Algiers, Algeria",
+    hours: apiData?.horaires || t("contact.hoursValue")
   };
   
   return (
